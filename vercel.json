@@ -3,6 +3,10 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://api.kasir-hilyas.tech/api/$1"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
