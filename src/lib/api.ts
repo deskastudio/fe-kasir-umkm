@@ -6,21 +6,6 @@ interface ApiResponse<T = any> {
   data?: T
 }
 
-// Helper untuk extract data dari berbagai format response
-function extractData<T>(response: any): T {
-  // Jika response adalah array, return langsung
-  if (Array.isArray(response)) return response as T
-  
-  // Jika ada response.data.data (paginated)
-  if (response?.data?.data) return response.data.data as T
-  
-  // Jika ada response.data (wrapped)
-  if (response?.data) return response.data as T
-  
-  // Return response langsung
-  return response as T
-}
-
 class ApiClient {
   private getToken(): string | null {
     return localStorage.getItem('token')

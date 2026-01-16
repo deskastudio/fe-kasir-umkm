@@ -16,15 +16,15 @@ export default function KasirDashboard() {
       api.getTransactions({ batas: 1000 }),
       api.getProducts({ batas: 1000, aktif: true })
     ]).then(([trxRes, prodRes]) => {
-      const transactions = extractData(trxRes)
-      const products = extractData(prodRes)
+      const transactions = extractData(trxRes) as any[] || []
+      const products = extractData(prodRes) as any[] || []
       
       // Filter transaksi kasir ini saja
       const myTransactions = transactions.filter((t: any) => t.idKasir === user?.id)
       
       setStats({
         totalTransactions: myTransactions.length,
-        totalRevenue: myTransactions.reduce((sum: number, t: any) => sum + Number(t.total), 0),
+        totalRevenue: myTransactions.reduce((sum: number, t: any) => sum + Number(t.total || t.totalAmount || 0), 0),
         totalProducts: products.length
       })
     }).finally(() => setLoading(false))

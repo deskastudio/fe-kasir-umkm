@@ -19,17 +19,17 @@ export default function AdminDashboard() {
       api.getTopProducts({ limit: 5 }),
       api.getLowStock(10)
     ]).then(([prodRes, trxRes, topRes, lowRes]) => {
-      const products = extractData(prodRes)
-      const transactions = extractData(trxRes)
+      const products = extractData(prodRes) as any[] || []
+      const transactions = extractData(trxRes) as any[] || []
       
       setStats({
         totalProducts: products.length,
         totalTransactions: transactions.length,
-        totalRevenue: transactions.reduce((sum: number, t: any) => sum + Number(t.total), 0)
+        totalRevenue: transactions.reduce((sum: number, t: any) => sum + Number(t.total || t.totalAmount || 0), 0)
       })
       
-      setTopProducts(extractData(topRes))
-      setLowStock(extractData(lowRes))
+      setTopProducts(extractData(topRes) || [])
+      setLowStock(extractData(lowRes) || [])
     }).catch(err => {
       console.error(err)
     }).finally(() => setLoading(false))
