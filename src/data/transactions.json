@@ -1,0 +1,67 @@
+[
+  {
+    "id": "trx-1",
+    "items": [
+      { "productId": "prd-1", "productName": "Nasi Goreng", "price": 15000, "quantity": 2 },
+      { "productId": "prd-4", "productName": "Es Teh Manis", "price": 5000, "quantity": 2 }
+    ],
+    "total": 40000,
+    "payment": 50000,
+    "change": 10000,
+    "cashierId": "usr-2",
+    "cashierName": "Budi Santoso",
+    "createdAt": "2025-01-15T10:30:00Z"
+  },
+  {
+    "id": "trx-2",
+    "items": [
+      { "productId": "prd-3", "productName": "Ayam Goreng", "price": 20000, "quantity": 1 },
+      { "productId": "prd-5", "productName": "Es Jeruk", "price": 7000, "quantity": 1 }
+    ],
+    "total": 27000,
+    "payment": 30000,
+    "change": 3000,
+    "cashierId": "usr-2",
+    "cashierName": "Budi Santoso",
+    "createdAt": "2025-01-15T11:15:00Z"
+  },
+  {
+    "id": "trx-3",
+    "items": [
+      { "productId": "prd-7", "productName": "Keripik Singkong", "price": 10000, "quantity": 3 },
+      { "productId": "prd-8", "productName": "Kacang Goreng", "price": 8000, "quantity": 2 }
+    ],
+    "total": 46000,
+    "payment": 50000,
+    "change": 4000,
+    "cashierId": "usr-3",
+    "cashierName": "Siti Rahayu",
+    "createdAt": "2025-01-15T14:00:00Z"
+  },
+  {
+    "id": "trx-4",
+    "items": [
+      { "productId": "prd-2", "productName": "Mie Goreng", "price": 13000, "quantity": 2 },
+      { "productId": "prd-6", "productName": "Kopi Hitam", "price": 6000, "quantity": 2 }
+    ],
+    "total": 38000,
+    "payment": 40000,
+    "change": 2000,
+    "cashierId": "usr-3",
+    "cashierName": "Siti Rahayu",
+    "createdAt": "2025-01-15T15:30:00Z"
+  },
+  {
+    "id": "trx-5",
+    "items": [
+      { "productId": "prd-9", "productName": "Sabun Mandi", "price": 12000, "quantity": 2 },
+      { "productId": "prd-10", "productName": "Shampo Sachet", "price": 2000, "quantity": 5 }
+    ],
+    "total": 34000,
+    "payment": 35000,
+    "change": 1000,
+    "cashierId": "usr-2",
+    "cashierName": "Budi Santoso",
+    "createdAt": "2025-01-14T09:00:00Z"
+  }
+]

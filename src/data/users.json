@@ -1,0 +1,5 @@
+[
+  { "id": "usr-1", "username": "admin", "password": "admin123", "name": "Administrator", "role": "admin", "email": "admin@pos.com", "createdAt": "2025-01-01T08:00:00Z" },
+  { "id": "usr-2", "username": "kasir1", "password": "kasir123", "name": "Budi Santoso", "role": "kasir", "email": "budi@pos.com", "createdAt": "2025-01-05T09:00:00Z" },
+  { "id": "usr-3", "username": "kasir2", "password": "kasir123", "name": "Siti Rahayu", "role": "kasir", "email": "siti@pos.com", "createdAt": "2025-01-10T10:00:00Z" }
+]

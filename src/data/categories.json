@@ -1,0 +1,6 @@
+[
+  { "id": "cat-1", "name": "Makanan" },
+  { "id": "cat-2", "name": "Minuman" },
+  { "id": "cat-3", "name": "Snack" },
+  { "id": "cat-4", "name": "Kebutuhan Rumah" }
+]
