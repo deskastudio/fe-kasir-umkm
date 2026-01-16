@@ -1,50 +1,58 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { transactions } from '@/data'
+import { useState, useEffect } from 'react'
+import { api } from '@/lib/api'
+import { extractData } from '@/lib/utils-api'
 import { useAuth } from '@/contexts/AuthContext'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatRupiah } from '@/lib/utils'
-import { ShoppingCart, TrendingUp, Clock, Target } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts'
+import { ShoppingCart, Package, TrendingUp, Loader2 } from 'lucide-react'
 
 export default function KasirDashboard() {
   const { user } = useAuth()
-  const myTransactions = transactions.filter(t => t.cashierId === user?.id)
-  const todayRevenue = myTransactions.reduce((sum, t) => sum + t.total, 0)
-  const avgTransaction = myTransactions.length > 0 ? todayRevenue / myTransactions.length : 0
-  const totalItems = myTransactions.flatMap(t => t.items).reduce((sum, i) => sum + i.quantity, 0)
+  const [stats, setStats] = useState({ totalTransactions: 0, totalRevenue: 0, totalProducts: 0 })
+  const [loading, setLoading] = useState(true)
 
-  const hourlyData = [
-    { hour: '08:00', trx: 2, revenue: 45000 },
-    { hour: '09:00', trx: 3, revenue: 67000 },
-    { hour: '10:00', trx: 5, revenue: 125000 },
-    { hour: '11:00', trx: 4, revenue: 98000 },
-    { hour: '12:00', trx: 7, revenue: 185000 },
-    { hour: '13:00', trx: 6, revenue: 156000 },
-    { hour: '14:00', trx: 4, revenue: 112000 },
-    { hour: '15:00', trx: 3, revenue: 78000 },
-  ]
+  useEffect(() => {
+    Promise.all([
+      api.getTransactions({ batas: 1000 }),
+      api.getProducts({ batas: 1000, aktif: true })
+    ]).then(([trxRes, prodRes]) => {
+      const transactions = extractData(trxRes)
+      const products = extractData(prodRes)
+      
+      // Filter transaksi kasir ini saja
+      const myTransactions = transactions.filter((t: any) => t.idKasir === user?.id)
+      
+      setStats({
+        totalTransactions: myTransactions.length,
+        totalRevenue: myTransactions.reduce((sum: number, t: any) => sum + Number(t.total), 0),
+        totalProducts: products.length
+      })
+    }).finally(() => setLoading(false))
+  }, [user])
 
-  const recentTrx = myTransactions.slice(0, 5)
+  if (loading) {
+    return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-[#465C88]" /></div>
+  }
 
-  const stats = [
-    { title: 'Transaksi Hari Ini', value: myTransactions.length, icon: ShoppingCart, bg: 'bg-[#465C88]' },
-    { title: 'Pendapatan Hari Ini', value: formatRupiah(todayRevenue), icon: TrendingUp, bg: 'bg-[#FF7A30]' },
-    { title: 'Rata-rata Transaksi', value: formatRupiah(avgTransaction), icon: Target, bg: 'bg-[#465C88]' },
-    { title: 'Item Terjual', value: totalItems, icon: Clock, bg: 'bg-[#FF7A30]' },
+  const avgTransaction = stats.totalTransactions > 0 ? stats.totalRevenue / stats.totalTransactions : 0
+
+  const statCards = [
+    { title: 'Total Transaksi Hari Ini', value: stats.totalTransactions, icon: ShoppingCart, bg: 'bg-[#465C88]' },
+    { title: 'Total Pendapatan', value: formatRupiah(stats.totalRevenue), icon: TrendingUp, bg: 'bg-[#FF7A30]' },
+    { title: 'Rata-rata Transaksi', value: formatRupiah(avgTransaction), icon: TrendingUp, bg: 'bg-[#FF7A30]' },
+    { title: 'Produk Tersedia', value: stats.totalProducts, icon: Package, bg: 'bg-[#465C88]' },
   ]
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-black">Halo, {user?.name}!</h1>
-        <div className="text-right text-sm text-[#465C88]">
-          <p>Shift Pagi</p>
-          <p className="font-medium text-black">08:00 - 16:00</p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-black">Selamat Datang, {user?.name}!</h1>
+        <p className="text-[#465C88]">Berikut ringkasan aktivitas Anda hari ini</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <Card key={stat.title} className="border-[#E9E3DF]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((stat, i) => (
+          <Card key={i} className="border-[#E9E3DF]">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-[#465C88]">{stat.title}</CardTitle>
               <div className={`p-2 rounded-lg ${stat.bg}`}>
@@ -58,62 +66,23 @@ export default function KasirDashboard() {
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="border-[#E9E3DF]">
-          <CardHeader>
-            <CardTitle className="text-black">Pendapatan per Jam</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <AreaChart data={hourlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E9E3DF" />
-                <XAxis dataKey="hour" fontSize={12} />
-                <YAxis fontSize={12} tickFormatter={(v) => `${v/1000}k`} />
-                <Tooltip formatter={(v) => formatRupiah(Number(v))} />
-                <Area type="monotone" dataKey="revenue" stroke="#FF7A30" fill="#FF7A30" fillOpacity={0.2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card className="border-[#E9E3DF]">
-          <CardHeader>
-            <CardTitle className="text-black">Jumlah Transaksi per Jam</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={hourlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E9E3DF" />
-                <XAxis dataKey="hour" fontSize={12} />
-                <YAxis fontSize={12} />
-                <Tooltip />
-                <Bar dataKey="trx" fill="#465C88" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
       <Card className="border-[#E9E3DF]">
         <CardHeader>
-          <CardTitle className="text-black">Transaksi Terakhir</CardTitle>
+          <CardTitle className="text-black">Aksi Cepat</CardTitle>
         </CardHeader>
-        <CardContent>
-          {recentTrx.length === 0 ? (
-            <p className="text-center text-[#465C88] py-8">Belum ada transaksi hari ini</p>
-          ) : (
-            <div className="space-y-2">
-              {recentTrx.map(trx => (
-                <div key={trx.id} className="flex items-center justify-between p-3 rounded-lg bg-[#E9E3DF]">
-                  <div>
-                    <p className="font-medium text-sm text-black">{trx.id}</p>
-                    <p className="text-xs text-[#465C88]">{trx.items.length} item</p>
-                  </div>
-                  <p className="font-bold text-black">{formatRupiah(trx.total)}</p>
-                </div>
-              ))}
-            </div>
-          )}
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <a href="/kasir/transaction" className="p-4 bg-[#FF7A30] text-white rounded-lg hover:bg-[#e86a20] transition-colors text-center">
+            <ShoppingCart className="h-8 w-8 mx-auto mb-2" />
+            <p className="font-medium">Transaksi Baru</p>
+          </a>
+          <a href="/kasir/products" className="p-4 bg-[#465C88] text-white rounded-lg hover:bg-[#3a4d6f] transition-colors text-center">
+            <Package className="h-8 w-8 mx-auto mb-2" />
+            <p className="font-medium">Lihat Produk</p>
+          </a>
+          <a href="/kasir/history" className="p-4 bg-[#465C88] text-white rounded-lg hover:bg-[#3a4d6f] transition-colors text-center">
+            <TrendingUp className="h-8 w-8 mx-auto mb-2" />
+            <p className="font-medium">Riwayat Transaksi</p>
+          </a>
         </CardContent>
       </Card>
     </div>

@@ -17,7 +17,7 @@ export default function LoginPage() {
   const passwordRef = useRef<HTMLInputElement>(null)
   const submitRef = useRef<HTMLButtonElement>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!username.trim()) {
       toast.error('Username harus diisi')
@@ -27,7 +27,8 @@ export default function LoginPage() {
       toast.error('Password harus diisi')
       return
     }
-    const result = login(username, password)
+    
+    const result = await login(username, password)
     if (result.success) {
       const user = JSON.parse(localStorage.getItem('user') || '{}')
       toast.success(`Selamat datang, ${user.name}!`)

@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { products as initialProducts, categories, getCategoryName } from '@/data'
-import type { Product } from '@/types'
+import { useState, useEffect } from 'react'
+import { api } from '@/lib/api'
+import { extractData } from '@/lib/utils-api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,49 +9,119 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Pencil, Trash2, Package } from 'lucide-react'
+import { Plus, Pencil, Trash2, Package, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatRupiah } from '@/lib/utils'
 
+interface Product {
+  id: string
+  kode: string
+  nama: string
+  kategori: string | null
+  idKategori: string | null
+  satuan: string | null
+  harga: number
+  stok: number
+  aktif: boolean
+}
+
 export default function ProductManagement() {
-  const [products, setProducts] = useState<Product[]>(initialProducts)
+  const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [editProduct, setEditProduct] = useState<Product | null>(null)
-  const [form, setForm] = useState({ name: '', price: '', stock: '', categoryId: '', sku: '' })
+  const [form, setForm] = useState({ kode: '', nama: '', kategori: '', satuan: '', harga: '', stok: '' })
 
-  const resetForm = () => setForm({ name: '', price: '', stock: '', categoryId: '', sku: '' })
+  const fetchProducts = async () => {
+    try {
+      const res = await api.getProducts({ batas: 100 })
+      setProducts(extractData(res))
+    } catch (e: any) {
+      toast.error(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  const handleSave = () => {
-    if (!form.name || !form.price || !form.categoryId || !form.sku) {
-      toast.error('Semua field harus diisi')
+  const fetchCategories = async () => {
+    try {
+      const res = await api.getCategories()
+      setCategories(extractData(res))
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  useEffect(() => {
+    fetchProducts()
+    fetchCategories()
+  }, [])
+
+  const resetForm = () => setForm({ kode: '', nama: '', kategori: '', satuan: '', harga: '', stok: '' })
+
+  const handleSave = async () => {
+    if (!form.kode || !form.nama || !form.harga) {
+      toast.error('Kode, nama, dan harga harus diisi')
       return
     }
-    if (editProduct) {
-      setProducts(products.map(p => p.id === editProduct.id ? { ...p, name: form.name, price: Number(form.price), stock: Number(form.stock), categoryId: form.categoryId, sku: form.sku } : p))
-      toast.success('Produk berhasil diupdate')
-    } else {
-      const newProduct: Product = { id: `prd-${Date.now()}`, name: form.name, price: Number(form.price), stock: Number(form.stock) || 0, categoryId: form.categoryId, sku: form.sku, createdAt: new Date().toISOString() }
-      setProducts([...products, newProduct])
-      toast.success('Produk berhasil ditambahkan')
+    setSaving(true)
+    try {
+      const data = {
+        kode: form.kode,
+        nama: form.nama,
+        idKategori: form.kategori || null,
+        satuan: form.satuan || null,
+        harga: Number(form.harga),
+        stok: Number(form.stok) || 0,
+      }
+      if (editProduct) {
+        await api.updateProduct(editProduct.id, data)
+        toast.success('Produk berhasil diupdate')
+      } else {
+        await api.createProduct(data)
+        toast.success('Produk berhasil ditambahkan')
+      }
+      setDialogOpen(false)
+      setEditProduct(null)
+      resetForm()
+      fetchProducts()
+    } catch (e: any) {
+      toast.error(e.message)
+    } finally {
+      setSaving(false)
     }
-    setDialogOpen(false)
-    setEditProduct(null)
-    resetForm()
   }
 
   const handleEdit = (product: Product) => {
     setEditProduct(product)
-    setForm({ name: product.name, price: String(product.price), stock: String(product.stock), categoryId: product.categoryId, sku: product.sku })
+    setForm({
+      kode: product.kode,
+      nama: product.nama,
+      kategori: product.idKategori || '',
+      satuan: product.satuan || '',
+      harga: String(product.harga),
+      stok: String(product.stok),
+    })
     setDialogOpen(true)
   }
 
-  const handleDelete = () => {
-    if (deleteId) {
-      setProducts(products.filter(p => p.id !== deleteId))
+  const handleDelete = async () => {
+    if (!deleteId) return
+    try {
+      await api.deleteProduct(deleteId)
       toast.success('Produk berhasil dihapus')
       setDeleteId(null)
+      fetchProducts()
+    } catch (e: any) {
+      toast.error(e.message)
     }
+  }
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-[#465C88]" /></div>
   }
 
   return (
@@ -71,7 +141,7 @@ export default function ProductManagement() {
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-[#465C88]">
-            <TableHead>SKU</TableHead>
+            <TableHead>Kode</TableHead>
             <TableHead>Nama Produk</TableHead>
             <TableHead>Kategori</TableHead>
             <TableHead className="text-right">Harga</TableHead>
@@ -86,14 +156,14 @@ export default function ProductManagement() {
             </TableRow>
           ) : products.map((product, i) => (
             <TableRow key={product.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-              <TableCell className="font-mono text-sm text-[#465C88]">{product.sku}</TableCell>
-              <TableCell className="font-medium text-black">{product.name}</TableCell>
+              <TableCell className="font-mono text-sm text-[#465C88]">{product.kode}</TableCell>
+              <TableCell className="font-medium text-black">{product.nama}</TableCell>
               <TableCell>
-                <Badge variant="outline" className="border-[#465C88] text-[#465C88]">{getCategoryName(product.categoryId)}</Badge>
+                <Badge variant="outline" className="border-[#465C88] text-[#465C88]">{product.kategori || '-'}</Badge>
               </TableCell>
-              <TableCell className="text-right font-semibold text-[#FF7A30]">{formatRupiah(product.price)}</TableCell>
+              <TableCell className="text-right font-semibold text-[#FF7A30]">{formatRupiah(product.harga)}</TableCell>
               <TableCell className="text-center">
-                <Badge className={product.stock < 10 ? 'bg-red-500' : 'bg-[#465C88]'}>{product.stock}</Badge>
+                <Badge className={product.stok < 10 ? 'bg-red-500' : 'bg-[#465C88]'}>{product.stok}</Badge>
               </TableCell>
               <TableCell>
                 <div className="flex justify-center gap-1">
@@ -117,36 +187,45 @@ export default function ProductManagement() {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>SKU</Label>
-              <Input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} className="border-[#E9E3DF]" />
+              <Label>Kode Produk</Label>
+              <Input value={form.kode} onChange={(e) => setForm({ ...form, kode: e.target.value })} className="border-[#E9E3DF]" disabled={!!editProduct} />
             </div>
             <div className="space-y-2">
               <Label>Nama Produk</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="border-[#E9E3DF]" />
+              <Input value={form.nama} onChange={(e) => setForm({ ...form, nama: e.target.value })} className="border-[#E9E3DF]" />
             </div>
-            <div className="space-y-2">
-              <Label>Kategori</Label>
-              <Select value={form.categoryId} onValueChange={(v) => setForm({ ...form, categoryId: v })}>
-                <SelectTrigger className="border-[#E9E3DF]"><SelectValue placeholder="Pilih kategori" /></SelectTrigger>
-                <SelectContent>
-                  {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Kategori</Label>
+                <Select value={form.kategori} onValueChange={(v) => setForm({ ...form, kategori: v })}>
+                  <SelectTrigger className="border-[#E9E3DF]"><SelectValue placeholder="Pilih kategori" /></SelectTrigger>
+                  <SelectContent>
+                    {categories.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.nama}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Satuan</Label>
+                <Input value={form.satuan} onChange={(e) => setForm({ ...form, satuan: e.target.value })} placeholder="pcs, kg, dll" className="border-[#E9E3DF]" />
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Harga</Label>
-                <Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="border-[#E9E3DF]" />
+                <Input type="number" value={form.harga} onChange={(e) => setForm({ ...form, harga: e.target.value })} className="border-[#E9E3DF]" />
               </div>
               <div className="space-y-2">
-                <Label>Stok Awal</Label>
-                <Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className="border-[#E9E3DF]" />
+                <Label>Stok</Label>
+                <Input type="number" value={form.stok} onChange={(e) => setForm({ ...form, stok: e.target.value })} className="border-[#E9E3DF]" />
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)} className="border-[#E9E3DF]">Batal</Button>
-            <Button onClick={handleSave} className="bg-[#FF7A30] hover:bg-[#e86a20] text-white">Simpan</Button>
+            <Button onClick={handleSave} disabled={saving} className="bg-[#FF7A30] hover:bg-[#e86a20] text-white">
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Simpan
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

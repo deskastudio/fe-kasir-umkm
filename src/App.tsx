@@ -11,6 +11,7 @@ const LoginPage = lazy(() => import('@/pages/LoginPage'))
 const AdminDashboard = lazy(() => import('@/pages/admin/Dashboard'))
 const UserManagement = lazy(() => import('@/pages/admin/UserManagement'))
 const ProductManagement = lazy(() => import('@/pages/admin/ProductManagement'))
+const CategoryManagement = lazy(() => import('@/pages/admin/CategoryManagement'))
 const StockManagement = lazy(() => import('@/pages/admin/StockManagement'))
 const TransactionList = lazy(() => import('@/pages/admin/TransactionList'))
 const ReportsPage = lazy(() => import('@/pages/admin/ReportsPage'))
@@ -47,6 +48,7 @@ function AppRoutes() {
         <Route index element={<Suspense fallback={<DashboardSkeleton />}><AdminDashboard /></Suspense>} />
         <Route path="users" element={<Suspense fallback={<TableSkeleton />}><UserManagement /></Suspense>} />
         <Route path="products" element={<Suspense fallback={<TableSkeleton cols={6} />}><ProductManagement /></Suspense>} />
+        <Route path="categories" element={<Suspense fallback={<TableSkeleton />}><CategoryManagement /></Suspense>} />
         <Route path="stock" element={<Suspense fallback={<TableSkeleton />}><StockManagement /></Suspense>} />
         <Route path="transactions" element={<Suspense fallback={<TableSkeleton cols={7} />}><TransactionList /></Suspense>} />
         <Route path="reports" element={<Suspense fallback={<ReportSkeleton />}><ReportsPage /></Suspense>} />

@@ -1,110 +1,102 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Lock, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { KeyRound, Eye, EyeOff } from 'lucide-react'
 
 export default function ChangePasswordPage() {
   const { changePassword } = useAuth()
-  const [form, setForm] = useState({ current: '', newPass: '', confirm: '' })
-  const [showCurrent, setShowCurrent] = useState(false)
-  const [showNew, setShowNew] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
+  const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
+  const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
 
-  const newPassRef = useRef<HTMLInputElement>(null)
-  const confirmRef = useRef<HTMLInputElement>(null)
-  const submitRef = useRef<HTMLButtonElement>(null)
-
-  const handleSave = () => {
-    if (!form.current || !form.newPass || !form.confirm) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!form.currentPassword || !form.newPassword || !form.confirmPassword) {
       toast.error('Semua field harus diisi')
       return
     }
-    if (form.newPass !== form.confirm) {
+    
+    if (form.newPassword !== form.confirmPassword) {
       toast.error('Password baru tidak cocok')
       return
     }
-    if (form.newPass.length < 6) {
+    
+    if (form.newPassword.length < 6) {
       toast.error('Password minimal 6 karakter')
       return
     }
     
-    const result = changePassword(form.current, form.newPass)
+    setLoading(true)
+    const result = await changePassword(form.currentPassword, form.newPassword)
+    setLoading(false)
+    
     if (result.success) {
       toast.success(result.message)
-      setForm({ current: '', newPass: '', confirm: '' })
+      setForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      setTimeout(() => navigate('/profile'), 1000)
     } else {
       toast.error(result.message)
     }
   }
 
   return (
-    <div className="max-w-md mx-auto">
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-[#465C88] rounded-lg">
+          <Lock className="h-5 w-5 text-white" />
+        </div>
+        <h1 className="text-2xl font-bold text-black">Ubah Password</h1>
+      </div>
+
       <Card className="border-[#E9E3DF]">
         <CardHeader>
-          <CardTitle className="flex items-center gap-3 text-black">
-            <div className="p-2 bg-[#FF7A30] rounded-lg">
-              <KeyRound className="h-5 w-5 text-white" />
-            </div>
-            Ganti Password
-          </CardTitle>
+          <CardTitle className="text-black">Ganti Password Akun</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Password Saat Ini</Label>
-            <div className="relative">
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Password Saat Ini</Label>
               <Input 
-                tabIndex={1}
-                autoFocus
-                type={showCurrent ? 'text' : 'password'} 
-                value={form.current} 
-                onChange={(e) => setForm({ ...form, current: e.target.value })} 
-                onKeyDown={(e) => e.key === 'Enter' && newPassRef.current?.focus()}
-                className="border-[#E9E3DF] pr-10"
+                type="password" 
+                value={form.currentPassword} 
+                onChange={(e) => setForm({ ...form, currentPassword: e.target.value })} 
+                className="border-[#E9E3DF]" 
               />
-              <button type="button" tabIndex={-1} onClick={() => setShowCurrent(!showCurrent)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#465C88] hover:text-[#FF7A30]">
-                {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Password Baru</Label>
-            <div className="relative">
+            <div className="space-y-2">
+              <Label>Password Baru</Label>
               <Input 
-                ref={newPassRef}
-                tabIndex={2}
-                type={showNew ? 'text' : 'password'} 
-                value={form.newPass} 
-                onChange={(e) => setForm({ ...form, newPass: e.target.value })} 
-                onKeyDown={(e) => e.key === 'Enter' && confirmRef.current?.focus()}
-                className="border-[#E9E3DF] pr-10"
+                type="password" 
+                value={form.newPassword} 
+                onChange={(e) => setForm({ ...form, newPassword: e.target.value })} 
+                className="border-[#E9E3DF]" 
               />
-              <button type="button" tabIndex={-1} onClick={() => setShowNew(!showNew)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#465C88] hover:text-[#FF7A30]">
-                {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Konfirmasi Password Baru</Label>
-            <div className="relative">
+            <div className="space-y-2">
+              <Label>Konfirmasi Password Baru</Label>
               <Input 
-                ref={confirmRef}
-                tabIndex={3}
-                type={showConfirm ? 'text' : 'password'} 
-                value={form.confirm} 
-                onChange={(e) => setForm({ ...form, confirm: e.target.value })} 
-                onKeyDown={(e) => e.key === 'Enter' && submitRef.current?.click()}
-                className="border-[#E9E3DF] pr-10"
+                type="password" 
+                value={form.confirmPassword} 
+                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} 
+                className="border-[#E9E3DF]" 
               />
-              <button type="button" tabIndex={-1} onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#465C88] hover:text-[#FF7A30]">
-                {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
             </div>
-          </div>
-          <Button ref={submitRef} tabIndex={4} onClick={handleSave} className="w-full bg-[#FF7A30] hover:bg-[#e86a20] text-white">Ubah Password</Button>
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={() => navigate('/profile')} className="border-[#E9E3DF]">
+                Batal
+              </Button>
+              <Button type="submit" disabled={loading} className="bg-[#FF7A30] hover:bg-[#e86a20] text-white">
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Simpan
+              </Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

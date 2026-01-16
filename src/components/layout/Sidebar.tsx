@@ -3,13 +3,14 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/contexts/AuthContext'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
-  LayoutDashboard, ShoppingCart, Package, Users, FileText, BarChart3, History, ClipboardList, Store
+  LayoutDashboard, ShoppingCart, Package, Users, FileText, BarChart3, History, ClipboardList, Store, Tag
 } from 'lucide-react'
 
 const adminMenu = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/admin/users', icon: Users, label: 'Kelola User' },
   { to: '/admin/products', icon: Package, label: 'Kelola Produk' },
+  { to: '/admin/categories', icon: Tag, label: 'Kategori' },
   { to: '/admin/stock', icon: ClipboardList, label: 'Kelola Stok' },
   { to: '/admin/transactions', icon: FileText, label: 'Daftar Transaksi' },
   { to: '/admin/reports', icon: BarChart3, label: 'Laporan' },
