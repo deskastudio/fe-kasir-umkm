@@ -14,11 +14,14 @@ export function formatRupiah(amount: number): string {
 }
 
 export function formatDate(date: string): string {
+  if (!date) return '-'
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return '-'
   return new Intl.DateTimeFormat('id-ID', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(new Date(date))
+  }).format(d)
 }
