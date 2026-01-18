@@ -30,8 +30,8 @@ export default function ReportsPage() {
           api.getTransactions({ batas: 20 })
         ])
         
-        const summaryData = extractData(summaryRes)
-        const transactionsData = extractData(trxRes) || []
+        const summaryData = extractData(summaryRes) as SalesSummary | null
+        const transactionsData = (extractData(trxRes) as Transaction[]) || []
         
         console.log('Summary data:', summaryData)
         console.log('Transactions data:', transactionsData)
@@ -49,8 +49,8 @@ export default function ReportsPage() {
           setSummary({ totalRevenue: 0, totalTransactions: 0, averageTransaction: 0 })
         }
         
-        setTopProducts(extractData(topRes) || [])
-        setLowStock(extractData(lowRes) || [])
+        setTopProducts((extractData(topRes) as TopProduct[]) || [])
+        setLowStock((extractData(lowRes) as LowStock[]) || [])
         setTransactions(transactionsData)
       } catch (err) {
         console.error('Error fetching reports:', err)
