@@ -29,6 +29,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (username: string, password: string): Promise<{ success: boolean; message: string }> => {
     try {
+      // Clear previous session before new login
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      
       const response = await api.login(username, password)
       
       if (response.success && response.data) {

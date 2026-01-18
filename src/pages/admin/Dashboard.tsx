@@ -81,10 +81,10 @@ export default function AdminDashboard() {
                 {topProducts.map((item: any, i: number) => (
                   <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex-1">
-                      <p className="font-medium text-black">{item.nama}</p>
-                      <p className="text-sm text-[#465C88]">Terjual: {item.totalTerjual} unit</p>
+                      <p className="font-medium text-black">{item.productName || item.nama}</p>
+                      <p className="text-sm text-[#465C88]">Terjual: {item.quantitySold || item.totalTerjual} unit</p>
                     </div>
-                    <p className="font-bold text-[#FF7A30]">{formatRupiah(item.totalPendapatan)}</p>
+                    <p className="font-bold text-[#FF7A30]">{formatRupiah(item.revenue || item.totalPendapatan)}</p>
                   </div>
                 ))}
               </div>
@@ -107,10 +107,10 @@ export default function AdminDashboard() {
                 {lowStock.map((item: any) => (
                   <div key={item.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
                     <div className="flex-1">
-                      <p className="font-medium text-black">{item.nama}</p>
-                      <p className="text-sm text-[#465C88]">{item.kode}</p>
+                      <p className="font-medium text-black">{item.name || item.nama}</p>
+                      <p className="text-sm text-[#465C88]">{item.sku || item.kode}</p>
                     </div>
-                    <Badge className="bg-red-500">Stok: {item.stok}</Badge>
+                    <Badge className="bg-red-500">Stok: {item.stock || item.stok}</Badge>
                   </div>
                 ))}
               </div>

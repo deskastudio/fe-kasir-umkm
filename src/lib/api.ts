@@ -34,10 +34,17 @@ class ApiClient {
 
   // Auth
   async login(username: string, password: string) {
-    return this.request<ApiResponse>('/auth/login', {
+    // Login request should not include old token
+    const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, kataSandi: password }),
     })
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Network error' }))
+      throw new Error(error.message || `HTTP ${response.status}`)
+    }
+    return response.json()
   }
 
   async logout() {
