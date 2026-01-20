@@ -54,11 +54,8 @@ export default function ProductManagement() {
   const fetchCategories = async () => {
     try {
       const res = await api.getCategories()
-      const data = extractData(res)
-      console.log('Categories fetched:', data)
-      setCategories(data)
+      setCategories(extractData(res) as Category[])
     } catch (e: any) {
-      console.error('Error fetching categories:', e)
       toast.error('Gagal memuat kategori: ' + e.message)
     }
   }
