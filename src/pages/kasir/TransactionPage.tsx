@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Minus, Trash2, ShoppingCart, Search, Percent, Loader2 } from 'lucide-react'
+import { Plus, Minus, Trash2, ShoppingCart, Search, Percent, Loader2, Filter } from 'lucide-react'
 import { formatRupiah } from '@/lib/utils'
 import { toast } from 'sonner'
 import { ReceiptDialog } from '@/components/ReceiptDialog'
@@ -37,7 +37,7 @@ export default function TransactionPage() {
   const [loading, setLoading] = useState(true)
   const [cart, setCart] = useState<CartItem[]>([])
   const [search, setSearch] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [payment, setPayment] = useState('')
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [receiptOpen, setReceiptOpen] = useState(false)
@@ -56,14 +56,13 @@ export default function TransactionPage() {
     ]).then(([prodRes, catRes]) => {
       setProducts(extractData(prodRes))
       const cats = extractData(catRes)
-      // Extract name dari array object {id, name} atau langsung pakai jika string
-      setCategories(Array.isArray(cats) ? cats.map((c: any) => typeof c === 'string' ? c : c.name) : [])
+      setCategories(Array.isArray(cats) ? cats.map((c: any) => c.nama) : [])
     }).finally(() => setLoading(false))
   }, [])
 
   const filteredProducts = products.filter(p => {
     const matchSearch = p.nama.toLowerCase().includes(search.toLowerCase()) || p.kode.toLowerCase().includes(search.toLowerCase())
-    const matchCategory = !selectedCategory || p.kategori === selectedCategory
+    const matchCategory = selectedCategory === 'all' || p.kategori === selectedCategory
     return matchSearch && matchCategory && p.stok > 0
   })
 
@@ -161,35 +160,33 @@ export default function TransactionPage() {
   }
 
   return (
-    <div className="flex gap-4 h-[calc(100vh-8rem)]">
-      <div className="flex-1 flex flex-col">
-        <div className="flex gap-3 mb-4">
-          <div className="relative flex-1 max-w-sm">
+    <div className="flex flex-col lg:flex-row gap-4 h-auto lg:h-[calc(100vh-8rem)]">
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="space-y-3 mb-4">
+          <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#465C88]" />
             <Input placeholder="Cari produk..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-white border-[#E9E3DF]" />
           </div>
-          <div className="flex gap-2 flex-wrap">
-            <Button variant={!selectedCategory ? 'default' : 'outline'} size="sm" onClick={() => setSelectedCategory(null)}
-              className={!selectedCategory ? 'bg-[#FF7A30] hover:bg-[#e86a20] text-white' : 'bg-white border-[#E9E3DF] text-black hover:bg-gray-50'}>
-              Semua
-            </Button>
-            {categories.map(c => (
-              <Button key={c} variant={selectedCategory === c ? 'default' : 'outline'} size="sm" onClick={() => setSelectedCategory(c)}
-                className={selectedCategory === c ? 'bg-[#FF7A30] hover:bg-[#e86a20] text-white' : 'bg-white border-[#E9E3DF] text-black hover:bg-gray-50'}>
-                {c}
-              </Button>
-            ))}
-          </div>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-full sm:w-[180px] border-[#E9E3DF] bg-white">
+              <Filter className="h-4 w-4 mr-2 text-[#465C88]" />
+              <SelectValue placeholder="Kategori" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Kategori</SelectItem>
+              {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
-        <ScrollArea className="flex-1">
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        <ScrollArea className="flex-1 min-h-[300px] lg:min-h-0">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
             {filteredProducts.map(product => (
               <Card key={product.id} className="cursor-pointer hover:shadow-md transition-shadow border-[#E9E3DF] hover:border-[#FF7A30]" onClick={() => addToCart(product.id)}>
-                <CardContent className="p-4">
-                  <p className="font-medium truncate text-black">{product.nama}</p>
+                <CardContent className="p-3 sm:p-4">
+                  <p className="font-medium truncate text-black text-sm sm:text-base">{product.nama}</p>
                   <p className="text-xs text-[#465C88]">{product.kode}</p>
-                  <p className="text-lg font-bold mt-1 text-[#FF7A30]">{formatRupiah(product.harga)}</p>
-                  <Badge variant="secondary" className="mt-2 bg-[#E9E3DF] text-[#465C88]">Stok: {product.stok}</Badge>
+                  <p className="text-base sm:text-lg font-bold mt-1 text-[#FF7A30]">{formatRupiah(product.harga)}</p>
+                  <Badge variant="secondary" className="mt-2 bg-[#E9E3DF] text-[#465C88] text-xs">Stok: {product.stok}</Badge>
                 </CardContent>
               </Card>
             ))}
@@ -197,7 +194,7 @@ export default function TransactionPage() {
         </ScrollArea>
       </div>
 
-      <Card className="w-80 flex flex-col border-[#E9E3DF]">
+      <Card className="w-full lg:w-80 flex flex-col border-[#E9E3DF]">
         <CardHeader className="pb-2 bg-[#465C88] text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />

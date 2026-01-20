@@ -35,15 +35,16 @@ export default function ProductList() {
         <div className="p-2 bg-[#FF7A30] rounded-lg">
           <Package className="h-5 w-5 text-white" />
         </div>
-        <h1 className="text-2xl font-bold text-black">Daftar Produk</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-black">Daftar Produk</h1>
       </div>
 
+      <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-[#465C88]">
             <TableHead>Kode</TableHead>
             <TableHead>Nama Produk</TableHead>
-            <TableHead>Kategori</TableHead>
+            <TableHead className="hidden sm:table-cell">Kategori</TableHead>
             <TableHead className="text-right">Harga</TableHead>
             <TableHead className="text-center">Stok</TableHead>
           </TableRow>
@@ -57,7 +58,7 @@ export default function ProductList() {
             <TableRow key={product.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
               <TableCell className="font-mono text-sm text-[#465C88]">{product.kode}</TableCell>
               <TableCell className="font-medium text-black">{product.nama}</TableCell>
-              <TableCell>
+              <TableCell className="hidden sm:table-cell">
                 <Badge variant="outline" className="border-[#465C88] text-[#465C88]">{product.kategori || '-'}</Badge>
               </TableCell>
               <TableCell className="text-right font-semibold text-[#FF7A30]">{formatRupiah(product.harga)}</TableCell>
@@ -68,6 +69,7 @@ export default function ProductList() {
           ))}
         </TableBody>
       </Table>
+      </div>
     </div>
   )
 }

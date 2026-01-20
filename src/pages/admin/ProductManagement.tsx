@@ -25,9 +25,14 @@ interface Product {
   aktif: boolean
 }
 
+interface Category {
+  id: string
+  nama: string
+}
+
 export default function ProductManagement() {
   const [products, setProducts] = useState<Product[]>([])
-  const [categories, setCategories] = useState<string[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -49,9 +54,12 @@ export default function ProductManagement() {
   const fetchCategories = async () => {
     try {
       const res = await api.getCategories()
-      setCategories(extractData(res))
-    } catch (e) {
-      console.error(e)
+      const data = extractData(res)
+      console.log('Categories fetched:', data)
+      setCategories(data)
+    } catch (e: any) {
+      console.error('Error fetching categories:', e)
+      toast.error('Gagal memuat kategori: ' + e.message)
     }
   }
 
@@ -126,18 +134,19 @@ export default function ProductManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-[#FF7A30] rounded-lg">
             <Package className="h-5 w-5 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-black">Kelola Produk</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-black">Kelola Produk</h1>
         </div>
-        <Button onClick={() => { resetForm(); setEditProduct(null); setDialogOpen(true) }} className="bg-[#FF7A30] hover:bg-[#e86a20] text-white">
+        <Button onClick={() => { resetForm(); setEditProduct(null); setDialogOpen(true) }} className="bg-[#FF7A30] hover:bg-[#e86a20] text-white w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" /> Tambah Produk
         </Button>
       </div>
 
+      <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-[#465C88]">
@@ -179,9 +188,10 @@ export default function ProductManagement() {
           ))}
         </TableBody>
       </Table>
+      </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="border-[#E9E3DF]">
+        <DialogContent className="border-[#E9E3DF] max-w-[95vw] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-black">{editProduct ? 'Edit Produk' : 'Tambah Produk'}</DialogTitle>
           </DialogHeader>
@@ -194,7 +204,7 @@ export default function ProductManagement() {
               <Label>Nama Produk</Label>
               <Input value={form.nama} onChange={(e) => setForm({ ...form, nama: e.target.value })} className="border-[#E9E3DF]" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Kategori</Label>
                 <Select value={form.kategori} onValueChange={(v) => setForm({ ...form, kategori: v })}>
@@ -209,7 +219,7 @@ export default function ProductManagement() {
                 <Input value={form.satuan} onChange={(e) => setForm({ ...form, satuan: e.target.value })} placeholder="pcs, kg, dll" className="border-[#E9E3DF]" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Harga</Label>
                 <Input type="number" value={form.harga} onChange={(e) => setForm({ ...form, harga: e.target.value })} className="border-[#E9E3DF]" />

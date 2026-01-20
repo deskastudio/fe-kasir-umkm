@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { extractData } from '@/lib/utils-api'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatRupiah } from '@/lib/utils'
-import { ShoppingCart, Package, TrendingUp, Loader2 } from 'lucide-react'
+import { ShoppingCart, Package, TrendingUp, Loader2, History } from 'lucide-react'
 
 export default function KasirDashboard() {
   const { user } = useAuth()
@@ -71,18 +72,18 @@ export default function KasirDashboard() {
           <CardTitle className="text-black">Aksi Cepat</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <a href="/kasir/transaction" className="p-4 bg-[#FF7A30] text-white rounded-lg hover:bg-[#e86a20] transition-colors text-center">
+          <Link to="/kasir/transaction" className="p-4 bg-[#FF7A30] text-white rounded-lg hover:bg-[#e86a20] transition-colors text-center">
             <ShoppingCart className="h-8 w-8 mx-auto mb-2" />
             <p className="font-medium">Transaksi Baru</p>
-          </a>
-          <a href="/kasir/products" className="p-4 bg-[#465C88] text-white rounded-lg hover:bg-[#3a4d6f] transition-colors text-center">
+          </Link>
+          <Link to="/kasir/products" className="p-4 bg-[#465C88] text-white rounded-lg hover:bg-[#3a4d6f] transition-colors text-center">
             <Package className="h-8 w-8 mx-auto mb-2" />
             <p className="font-medium">Lihat Produk</p>
-          </a>
-          <a href="/kasir/history" className="p-4 bg-[#465C88] text-white rounded-lg hover:bg-[#3a4d6f] transition-colors text-center">
-            <TrendingUp className="h-8 w-8 mx-auto mb-2" />
+          </Link>
+          <Link to="/kasir/history" className="p-4 bg-[#465C88] text-white rounded-lg hover:bg-[#3a4d6f] transition-colors text-center">
+            <History className="h-8 w-8 mx-auto mb-2" />
             <p className="font-medium">Riwayat Transaksi</p>
-          </a>
+          </Link>
         </CardContent>
       </Card>
     </div>
