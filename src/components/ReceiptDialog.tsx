@@ -143,9 +143,9 @@ export function ReceiptDialog({ open, onClose, data }: ReceiptDialogProps) {
 
         <div className="bg-white p-4 border border-dashed border-[#E9E3DF] rounded-lg font-mono text-sm max-h-[50vh] overflow-y-auto">
           <div className="text-center mb-3 pb-3 border-b-2 border-[#465C88]">
-            <h3 className="font-bold text-lg text-[#465C88]">POS UMKM</h3>
-            <p className="text-xs text-[#465C88]">Jl. Contoh Alamat No. 123</p>
-            <p className="text-xs text-[#465C88]">Telp: 0812-3456-7890</p>
+            <h3 className="font-bold text-lg text-[#465C88]">Toko H.Ilyas</h3>
+            <p className="text-xs text-[#465C88]">Kp. Cirewed RT01/04, Ds. Sukadamai</p>
+            <p className="text-xs text-[#465C88]">Telp: 081398243122</p>
           </div>
 
           <div className="flex justify-between text-xs mb-1">
