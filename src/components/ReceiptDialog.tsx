@@ -42,11 +42,11 @@ export function ReceiptDialog({ open, onClose, data }: ReceiptDialogProps) {
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(14)
     doc.setFont('helvetica', 'bold')
-    doc.text('POS UMKM', w / 2, 10, { align: 'center' })
+    doc.text('Toko H.Ilyas', w / 2, 10, { align: 'center' })
     doc.setFontSize(8)
     doc.setFont('helvetica', 'normal')
-    doc.text('Jl. Contoh Alamat No. 123', w / 2, 16, { align: 'center' })
-    doc.text('Telp: 0812-3456-7890', w / 2, 21, { align: 'center' })
+    doc.text('Kp. Cirewed RT01/04, Ds. Sukadamai', w / 2, 16, { align: 'center' })
+    doc.text('Telp: 081398243122', w / 2, 21, { align: 'center' })
 
     y = 32
     doc.setTextColor(0, 0, 0)
